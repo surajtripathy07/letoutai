@@ -179,7 +179,7 @@ input{caret-color:var(--green-600)}
 .op{margin:0;font:600 clamp(2.4rem,.9rem + 5.4vw,5.5rem)/1 var(--fd);letter-spacing:-.032em;font-variation-settings:"opsz" 144;text-wrap:balance}
 .credits{display:flex;flex-direction:column;gap:6px;margin:22px 0 0}
 .on-paper .cr{color:var(--muted)}
-.sec{position:relative;z-index:2;padding:clamp(88px,14vh,160px) 0}
+.sec{position:relative;z-index:2;padding:clamp(64px,9vh,104px) 0}
 .sub{max-width:34em;margin:24px 0 0;font-size:1.125rem;color:var(--muted-d)}
 .on-paper .sub{color:var(--muted)}
 
@@ -444,3 +444,36 @@ html:not(.js) .stp,html:not(.js) .pick,html:not(.js) .xc{display:none}
 .steps[hidden]{display:none}
 /* the lanes carry the match while motion is allowed; the static foreground chips would sit on the lane chips */
 @media (prefers-reduced-motion:no-preference){.js .fg{display:none}}
+
+/* the report bubble: a WhatsApp business message with a monospace ledger */
+.m.rp{min-width:min(228px,92%);max-width:92%}
+.rep-h{display:block;font-weight:600}
+.rep-s{display:block;margin-bottom:6px;color:#667781;font-size:12px}
+.rep{display:grid;gap:3px;font:400 12px/1.4 var(--fm);font-variant-numeric:tabular-nums}
+.rep>span{display:flex;justify-content:space-between;gap:12px}
+.rep b{font-weight:500;white-space:nowrap}
+.rep.tab>span:last-child{margin-top:3px;padding-top:5px;border-top:1px dashed rgba(17,27,33,.24);font-weight:600}
+.rep.tab>span:last-child b{font-weight:600;color:#0E7C5B}
+.rep .one{justify-content:flex-start;gap:6px;font:400 12.5px/1.35 var(--fs)}
+.rep .one svg{width:14px;height:14px;flex:none;margin-top:1px;color:#0E7C5B}
+/* what Sally runs: four cropped chats, the operator's side of the product */
+.runs{display:grid;gap:48px 24px;margin-top:56px}
+.run{display:flex;flex-direction:column;min-width:0}
+.run .n{color:var(--green-600);font:500 .8125rem/1 var(--fm);letter-spacing:.08em}
+.run h3{margin:14px 0 10px;font:600 clamp(1.35rem,1.1rem + .9vw,1.6rem)/1.15 var(--fd);letter-spacing:-.015em}
+.run p{max-width:34em;margin:0 0 22px;font-size:1rem}
+.xw{display:flex;flex-direction:column;height:252px;margin-top:auto;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:#EFEAE2;box-shadow:var(--sh);color:#111B21}
+.xh{position:relative;z-index:1;display:flex;flex:none;align-items:center;gap:9px;height:46px;padding:0 12px;background:#fff;box-shadow:0 1px 0 rgba(11,20,26,.07)}
+.xh .wa-av{width:28px;height:28px;font-size:13px}
+.xh b{display:block;font:600 13.5px/1.15 var(--fs)}
+.xh small{display:block;color:#667781;font:400 11px/1.25 var(--fs)}
+.keep{display:grid;gap:18px;margin-top:64px;padding-top:28px;border-top:1px solid var(--line)}
+.keep h3{margin:0;font:600 1.35rem/1.2 var(--fd)}
+@media (min-width:720px){.runs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:960px){.keep{grid-template-columns:200px minmax(0,1fr);align-items:start}.keep .ticks{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}}
+@media (min-width:1280px){.runs{grid-template-columns:repeat(4,minmax(0,1fr))}}
+html:not(.js) .xw{display:none}
+@media (max-width:719px){.xw{height:auto}.xw .wa-bd{padding-top:30px}}
+.prom li.wide{grid-column:1/-1}
+/* a section that closes on a full-width rule (the promise lists): the rule is its lower edge, so the next section's top padding is the only gap; two stacked 14vh paddings read as a hole */
+.sec.rule-end{padding-bottom:0}

@@ -7,7 +7,7 @@ const DK=w.matchMedia('(min-width:1024px)');
 const $=(s,r=d)=>r.querySelector(s),$$=(s,r=d)=>[...r.querySelectorAll(s)];
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const fmt=n=>Math.round(n).toLocaleString('en-IN');
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/\b(Rs|Bed) (?=\d)/g,'$1&nbsp;');
 const svg=(vb,p,c)=>`<svg viewBox="${vb}" aria-hidden="true"${c?` class="${c}"`:''}>${p}</svg>`;
 const S2='fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
 const IC={
@@ -50,8 +50,12 @@ operator:[
 ['day','Saturday'],
 ['i','Visit done. Token received for Bed 3.','12:10'],
 ['doc',{n:'Agreement.pdf',s:'Signed by tenant'},'12:40'],
-['ok',{h:'Bed filled',t:'Bed 3, Hiranandani Gardens: agreement signed, move-in 1 Dec.'},'12:41']
+['ok',{h:'Bed filled',t:'Bed 3, Hiranandani Gardens: agreement signed, move-in 1 Dec.'},'12:41'],
+['day','Sunday'],
+['rep',{h:'Monthly report',s:'Hiranandani Gardens, October',l:[['Beds filled','6 of 8'],['Rent collected','Rs 1,20,000'],['Expenses','Rs 70,000'],['Net','Rs 50,000']]},'09:00']
 ]};
+/* the operators page: one excerpt for each job Sally runs */
+{const O=TH.operator;TH.ops=[O[0],O[5],O[6],['i','Saved against Bed 3, Hiranandani Gardens. I will send the renewal when it is due.','12:40'],['rep',{h:'Daily summary',s:'Hiranandani Gardens',l:[['Rent reminders sent to tenants'],['Visit reminder sent for Sat 11:00'],['Renewal notice sent for Bed 2']]},'20:00'],O[9]]}
 const HEAD={tenant:'Today',operator:'Thursday'};
 
 function el(m,prev){
@@ -66,6 +70,7 @@ else if(k==='btn'||k==='card')e.innerHTML=(v.h?`<span class="card-h">${esc(v.h)}
 else if(k==='ok')e.innerHTML=`<span class="ok-h">${svg('0 0 24 24',IC.ok)}${esc(v.h)}</span>${esc(v.t)}${tm}`;
 else if(k==='loc'){e.classList.add('loc');e.innerHTML=`<div class="map">${svg('0 0 26 34',IC.pin)}</div><div class="cap"><b>${esc(v.n)}</b>${esc(v.a)}${tm}</div>`}
 else if(k==='doc')e.innerHTML=`<div class="doc"><span class="pdf">PDF</span><span><b>${esc(v.n)}</b><small>${esc(v.s)}</small></span></div>${tm}`;
+else if(k==='rep'){e.classList.add('rp');const tab=v.l.every(r=>r.length>1);e.innerHTML=`<span class="rep-h">${esc(v.h)}</span>${v.s?`<span class="rep-s">${esc(v.s)}</span>`:''}<span class="rep${tab?' tab':''}">${v.l.map(r=>r.length>1?`<span><span>${esc(r[0])}</span><b>${esc(r[1])}</b></span>`:`<span class="one">${svg('0 0 24 24',IC.ok)}${esc(r[0])}</span>`).join('')}</span>${tm}`}
 return e;
 }
 function phone(box,p){
@@ -99,7 +104,7 @@ if(id!==P.run)return;show(P,i,true);
 }
 P.done=true;
 }
-const plain=([k,v])=>typeof v==='string'?v:[v.h,v.to,v.n,v.p,v.d,v.r,v.t,v.a,v.s,v.b&&('Buttons: '+v.b.join(', '))].filter(Boolean).join('. ');
+const plain=([k,v])=>typeof v==='string'?v:[v.h,v.to,v.n,v.p,v.d,v.r,v.t,v.a,v.s,v.l&&v.l.map(r=>r.join(': ')).join('. '),v.b&&('Buttons: '+v.b.join(', '))].filter(Boolean).join('. ');
 function transcript(box,keys){
 const s=d.createElement('div');s.className='sr-only';
 s.innerHTML=keys.map(p=>`<p>${p==='tenant'?'Chat between a tenant and Sally':'Chat between an operator and Sally'}</p><ol>${TH[p].filter(m=>m[0]!=='day').map(m=>`<li>${m[0]==='o'?(p==='tenant'?'Tenant':'Operator'):'Sally'}: ${esc(plain(m))}</li>`).join('')}</ol>`).join('');
@@ -155,14 +160,17 @@ if(sky){sky.style.setProperty('--x',(mx*100).toFixed(1)+'%');sky.style.setProper
 
 /* the story. 1024 and up: one pinned phone, the steps scrub it. Under 1024: the phone loops its replay
    and scrolls away, and each step card carries its own static excerpt of the chat. */
+/* a static excerpt of a thread: the messages at the listed indexes; a tapped button stays marked */
+function excerpt(c,L,xs){if(!L)return;xs.split(',').map(Number).forEach((i,j,a)=>{c.appendChild(el(L[i],j?L[a[j-1]]:null));const t=L[i][3];if(t!==undefined){const rb=$$('.rb',c).pop();rb&&rb.children[t]&&rb.children[t].classList.add('tap')}})}
+$$('[data-th][data-x]').forEach(x=>{const c=$('.wa-th',x);c&&excerpt(c,TH[x.dataset.th],x.dataset.x)});
+
 const story=$('.story');
 if(story){
 const box=$('.phone[data-thread]',story),P=phone(box,'tenant');transcript(box,['tenant','operator']);
-$$('.step[data-x]',story).forEach(s=>{const c=$('.xc .wa-th',s),L=TH[s.parentNode.dataset.side];if(!c||!L)return;
-s.dataset.x.split(',').map(Number).forEach((i,j,a)=>{c.appendChild(el(L[i],j?L[a[j-1]]:null));const t=L[i][3];if(t!==undefined){const rb=$$('.rb',c).pop();rb&&rb.children[t]&&rb.children[t].classList.add('tap')}})});
+$$('.step[data-x]',story).forEach(s=>{const c=$('.xc .wa-th',s);c&&excerpt(c,TH[s.parentNode.dataset.side],s.dataset.x)});
 let act=-1,seen=true,so=null;
-const vis=()=>$$('.steps:not([hidden]) .step',story),num=$('.stp b',story);
-P.cb=n=>{if(!num)return;const u=vis().map(s=>+s.dataset.upto),k=u.findIndex(x=>x>=n);num.textContent=k<0?u.length:k+1};
+const vis=()=>$$('.steps:not([hidden]) .step',story),num=$('.stp b',story),tot=$('.stp span',story);
+P.cb=n=>{if(!num)return;const u=vis().map(s=>+s.dataset.upto),k=u.findIndex(x=>x>=n);num.textContent=k<0?u.length:k+1;if(tot)tot.textContent=u.length};
 const mark=i=>{const ss=vis();ss.forEach((x,j)=>{x.classList.toggle('on',j===i);x.classList.toggle('past',j<i)});const ol=ss[0]&&ss[0].parentNode,n=i>-1&&$('.n',ss[i]);ol&&ol.style.setProperty('--fill',n?Math.max(0,n.getBoundingClientRect().top-ol.getBoundingClientRect().top+.5).toFixed(1)+'px':'0px')};
 const go=(i,anim)=>{const s=vis()[i];if(!s)return;act=i;P.run++;typing(P,false);mark(i);show(P,+s.dataset.upto,anim&&!R)};
 const full=()=>{P.run++;typing(P,false);show(P,99)};
@@ -176,7 +184,7 @@ $$('.step',story).forEach(s=>s.addEventListener('mouseenter',()=>{if(!DK.matches
 const hero=$('.hero',story),ho=IO(([e])=>{if(e.isIntersecting&&act>-1){act=-1;mark(-1);full()}},{threshold:.6});
 ho&&hero&&ho.observe(hero);
 const sg=$('.seg',story);
-sg&&seg(sg,p=>{const i=act;box.classList.add('fade');P.run++;setTimeout(()=>{P.p=p;typing(P,false);$$('[data-side]',story).forEach(x=>x.hidden=x.dataset.side!==p);box.classList.remove('fade');if(i>-1&&DK.matches){act=-1;go(i,false)}else{act=-1;mark(-1);run()}},R?0:300)});
+sg&&seg(sg,p=>{const i=act;box.classList.add('fade');P.run++;setTimeout(()=>{P.p=p;typing(P,false);$$('[data-side]',story).forEach(x=>x.hidden=x.dataset.side!==p);box.classList.remove('fade');if(i>-1&&DK.matches){act=-1;go(Math.min(i,vis().length-1),false)}else{act=-1;mark(-1);run()}},R?0:300)});
 lanes(box);depth(story);
 }
 
